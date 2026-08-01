@@ -18,6 +18,33 @@ app.get("/api/products", (req, res) => {
     res.json(products);
 });
 
+app.delete("/api/products/:id", (req, res) => {
+
+    const id = Number(req.params.id);
+
+    console.log("ID recibido:", id);
+    console.log(products);
+
+    const indice = products.findIndex(producto => producto.id === id);
+
+    console.log("Indice:", indice);
+
+    if (indice === -1) {
+        return res.status(404).json({
+            mensaje: "Producto no encontrado"
+        });
+    }
+
+    products.splice(indice, 1);
+
+    console.log(products);
+
+    res.json({
+        mensaje: "Producto eliminado"
+    });
+
+});
+
 // Crear producto
 app.post("/api/products", (req, res) => {
 
