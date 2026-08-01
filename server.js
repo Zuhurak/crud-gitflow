@@ -4,18 +4,38 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
-// Permite recibir datos JSON
 app.use(express.json());
-
-// Servir archivos estaticos
 app.use(express.static(path.join(__dirname, "public")));
 
-// Ruta principal
+const products = [];
+
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Iniciar servidor
+// Obtener todos los productos
+app.get("/api/products", (req, res) => {
+    res.json(products);
+});
+
+// Crear producto
+app.post("/api/products", (req, res) => {
+
+    const { nombre, precio, cantidad } = req.body;
+
+    const nuevoProducto = {
+        id: Date.now(),
+        nombre,
+        precio,
+        cantidad
+    };
+
+    products.push(nuevoProducto);
+
+    res.status(201).json(nuevoProducto);
+
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor ejecutandose en http://localhost:${PORT}`);
 });
