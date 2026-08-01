@@ -30,6 +30,12 @@ Editar
 
 </button>
 
+<button onclick="eliminarProducto(${producto.id})">
+
+Eliminar
+
+</button>
+
 </td>
 
             </tr>
@@ -113,6 +119,26 @@ async function editarProducto(id){
 
     formulario.querySelector("button").textContent =
         "Actualizar Producto";
+
+}
+
+async function eliminarProducto(id){
+
+    const confirmar = confirm("¿Desea eliminar este producto?");
+
+    if(!confirmar){
+        return;
+    }
+
+    await fetch(`/api/products/${id}`,{
+
+        method:"DELETE"
+
+    });
+
+    mensaje.innerHTML = "Producto eliminado.";
+
+    cargarProductos();
 
 }
 
