@@ -37,3 +37,25 @@ button{
     font-weight:bold;
 
 }
+
+table{
+
+    border-collapse: collapse;
+    width:100%;
+    background:white;
+
+}
+
+th,
+td{
+
+    padding:10px;
+    text-align:center;
+
+}
+
+button{
+
+    margin:4px;
+
+}
