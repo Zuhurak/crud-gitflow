@@ -36,6 +36,27 @@ app.post("/api/products", (req, res) => {
 
 });
 
+// Actualizar producto
+app.put("/api/products/:id", (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const producto = products.find(p => p.id === id);
+
+    if (!producto) {
+        return res.status(404).json({
+            mensaje: "Producto no encontrado"
+        });
+    }
+
+    producto.nombre = req.body.nombre;
+    producto.precio = req.body.precio;
+    producto.cantidad = req.body.cantidad;
+
+    res.json(producto);
+
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor ejecutandose en http://localhost:${PORT}`);
 });
