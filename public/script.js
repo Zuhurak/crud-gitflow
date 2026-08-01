@@ -1,13 +1,23 @@
+const buscador = document.getElementById("buscar");
 let productoEditando = null;
+
 const formulario = document.getElementById("productForm");
 const mensaje = document.getElementById("mensaje");
 const tabla = document.getElementById("tablaProductos");
+
+let listaProductos = [];
 
 async function cargarProductos() {
 
     const respuesta = await fetch("/api/products");
 
-    const productos = await respuesta.json();
+    listaProductos = await respuesta.json();
+
+    mostrarProductos(listaProductos);
+
+}
+
+function mostrarProductos(productos) {
 
     tabla.innerHTML = "";
 
@@ -15,30 +25,26 @@ async function cargarProductos() {
 
         tabla.innerHTML += `
 
-            <tr>
+        <tr>
 
-                <td>${producto.id}</td>
-                <td>${producto.nombre}</td>
-                <td>${producto.precio}</td>
-                <td>${producto.cantidad}</td>
+            <td>${producto.id}</td>
+            <td>${producto.nombre}</td>
+            <td>${producto.precio}</td>
+            <td>${producto.cantidad}</td>
 
-<td>
+            <td>
 
-<button onclick="editarProducto(${producto.id})">
+                <button onclick="editarProducto(${producto.id})">
+                    Editar
+                </button>
 
-Editar
+                <button onclick="eliminarProducto(${producto.id})">
+                    Eliminar
+                </button>
 
-</button>
+            </td>
 
-<button onclick="eliminarProducto(${producto.id})">
-
-Eliminar
-
-</button>
-
-</td>
-
-            </tr>
+        </tr>
 
         `;
 
@@ -46,55 +52,55 @@ Eliminar
 
 }
 
-formulario.addEventListener("submit", async (e)=>{
+formulario.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
-    const producto={
+    const producto = {
 
-        nombre:document.getElementById("nombre").value,
-        precio:Number(document.getElementById("precio").value),
-        cantidad:Number(document.getElementById("cantidad").value)
+        nombre: document.getElementById("nombre").value,
+        precio: Number(document.getElementById("precio").value),
+        cantidad: Number(document.getElementById("cantidad").value)
 
     };
 
-    if(productoEditando){
+    if (productoEditando) {
 
-        await fetch(`/api/products/${productoEditando}`,{
+        await fetch(`/api/products/${productoEditando}`, {
 
-            method:"PUT",
+            method: "PUT",
 
-            headers:{
-                "Content-Type":"application/json"
+            headers: {
+                "Content-Type": "application/json"
             },
 
-            body:JSON.stringify(producto)
+            body: JSON.stringify(producto)
 
         });
 
-        mensaje.innerHTML="Producto actualizado";
+        mensaje.innerHTML = "Producto actualizado.";
 
-        productoEditando=null;
+        productoEditando = null;
 
-        formulario.querySelector("button").textContent="Agregar Producto";
+        formulario.querySelector("button").textContent = "Agregar Producto";
 
-    }else{
+    } else {
 
-        const respuesta=await fetch("/api/products",{
+        const respuesta = await fetch("/api/products", {
 
-            method:"POST",
+            method: "POST",
 
-            headers:{
-                "Content-Type":"application/json"
+            headers: {
+                "Content-Type": "application/json"
             },
 
-            body:JSON.stringify(producto)
+            body: JSON.stringify(producto)
 
         });
 
-        const datos=await respuesta.json();
+        const datos = await respuesta.json();
 
-        mensaje.innerHTML=`Producto agregado: ${datos.nombre}`;
+        mensaje.innerHTML = `Producto agregado: ${datos.nombre}`;
 
     }
 
@@ -103,13 +109,12 @@ formulario.addEventListener("submit", async (e)=>{
     cargarProductos();
 
 });
-async function editarProducto(id){
 
-    const respuesta = await fetch("/api/products");
+function editarProducto(id) {
 
-    const productos = await respuesta.json();
+    const producto = listaProductos.find(p => p.id === id);
 
-    const producto = productos.find(p => p.id === id);
+    if (!producto) return;
 
     productoEditando = id;
 
@@ -117,29 +122,48 @@ async function editarProducto(id){
     document.getElementById("precio").value = producto.precio;
     document.getElementById("cantidad").value = producto.cantidad;
 
-    formulario.querySelector("button").textContent =
-        "Actualizar Producto";
+    formulario.querySelector("button").textContent = "Actualizar Producto";
 
 }
 
-async function eliminarProducto(id){
+async function eliminarProducto(id) {
 
     const confirmar = confirm("¿Desea eliminar este producto?");
 
-    if(!confirmar){
+    if (!confirmar) {
         return;
     }
 
-    await fetch(`/api/products/${id}`,{
+    const respuesta = await fetch(`/api/products/${id}`, {
 
-        method:"DELETE"
+        method: "DELETE"
 
     });
 
-    mensaje.innerHTML = "Producto eliminado.";
+    if (respuesta.ok) {
 
-    cargarProductos();
+        mensaje.innerHTML = "Producto eliminado.";
+
+        cargarProductos();
+
+    } else {
+
+        mensaje.innerHTML = "No se pudo eliminar el producto.";
+
+    }
 
 }
+
+buscador.addEventListener("input", () => {
+
+    const texto = buscador.value.toLowerCase();
+
+    const resultado = listaProductos.filter(producto =>
+        producto.nombre.toLowerCase().includes(texto)
+    );
+
+    mostrarProductos(resultado);
+
+});
 
 cargarProductos();
