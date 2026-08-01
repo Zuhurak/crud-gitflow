@@ -1,5 +1,33 @@
 const formulario = document.getElementById("productForm");
 const mensaje = document.getElementById("mensaje");
+const tabla = document.getElementById("tablaProductos");
+
+async function cargarProductos() {
+
+    const respuesta = await fetch("/api/products");
+
+    const productos = await respuesta.json();
+
+    tabla.innerHTML = "";
+
+    productos.forEach(producto => {
+
+        tabla.innerHTML += `
+
+            <tr>
+
+                <td>${producto.id}</td>
+                <td>${producto.nombre}</td>
+                <td>${producto.precio}</td>
+                <td>${producto.cantidad}</td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
 
 formulario.addEventListener("submit", async (e) => {
 
@@ -33,4 +61,8 @@ formulario.addEventListener("submit", async (e) => {
 
     formulario.reset();
 
+    cargarProductos();
+
 });
+
+cargarProductos();
