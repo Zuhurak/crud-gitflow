@@ -1,3 +1,4 @@
+let productoEditando = null;
 const formulario = document.getElementById("productForm");
 const mensaje = document.getElementById("mensaje");
 const tabla = document.getElementById("tablaProductos");
@@ -21,6 +22,16 @@ async function cargarProductos() {
                 <td>${producto.precio}</td>
                 <td>${producto.cantidad}</td>
 
+<td>
+
+<button onclick="editarProducto(${producto.id})">
+
+Editar
+
+</button>
+
+</td>
+
             </tr>
 
         `;
@@ -29,40 +40,80 @@ async function cargarProductos() {
 
 }
 
-formulario.addEventListener("submit", async (e) => {
+formulario.addEventListener("submit", async (e)=>{
 
     e.preventDefault();
 
-    const producto = {
+    const producto={
 
-        nombre: document.getElementById("nombre").value,
-        precio: Number(document.getElementById("precio").value),
-        cantidad: Number(document.getElementById("cantidad").value)
+        nombre:document.getElementById("nombre").value,
+        precio:Number(document.getElementById("precio").value),
+        cantidad:Number(document.getElementById("cantidad").value)
 
     };
 
-    const respuesta = await fetch("/api/products", {
+    if(productoEditando){
 
-        method: "POST",
+        await fetch(`/api/products/${productoEditando}`,{
 
-        headers: {
+            method:"PUT",
 
-            "Content-Type": "application/json"
+            headers:{
+                "Content-Type":"application/json"
+            },
 
-        },
+            body:JSON.stringify(producto)
 
-        body: JSON.stringify(producto)
+        });
 
-    });
+        mensaje.innerHTML="Producto actualizado";
 
-    const datos = await respuesta.json();
+        productoEditando=null;
 
-    mensaje.innerHTML = `Producto agregado: ${datos.nombre}`;
+        formulario.querySelector("button").textContent="Agregar Producto";
+
+    }else{
+
+        const respuesta=await fetch("/api/products",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(producto)
+
+        });
+
+        const datos=await respuesta.json();
+
+        mensaje.innerHTML=`Producto agregado: ${datos.nombre}`;
+
+    }
 
     formulario.reset();
 
     cargarProductos();
 
 });
+async function editarProducto(id){
+
+    const respuesta = await fetch("/api/products");
+
+    const productos = await respuesta.json();
+
+    const producto = productos.find(p => p.id === id);
+
+    productoEditando = id;
+
+    document.getElementById("nombre").value = producto.nombre;
+    document.getElementById("precio").value = producto.precio;
+    document.getElementById("cantidad").value = producto.cantidad;
+
+    formulario.querySelector("button").textContent =
+        "Actualizar Producto";
+
+}
 
 cargarProductos();
